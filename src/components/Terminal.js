@@ -387,11 +387,10 @@ const Terminal = () => {
     buy: (args) => {
       const amount = parseFloat(args[0]);
       if (isNaN(amount) || amount <= 0) {
-        return `<pre>Invalid amount. Please enter a positive number.
+        return <>Invalid amount. Please enter a positive number. <br />
             
     usage: buy &lt;amount&gt;
-        </pre>
-       `;
+        </>;
       }
       
       setAsyncOutput(<>Processing deposit of {amount}<EthIcon />...</>);
@@ -406,11 +405,10 @@ const Terminal = () => {
     sell: (args) => {
       const amount = parseFloat(args[0]);
       if (isNaN(amount) || amount <= 0) {
-        return `<pre>Invalid amount. Please enter a positive number.
+        return <>Invalid amount. Please enter a positive number. <br />
 
     usage: sell &lt;amount&gt;
-        </pre>
-       `;
+        </>;
       }
       
       setAsyncOutput(`Processing sale of ${amount}🌹...`);
@@ -426,11 +424,10 @@ const Terminal = () => {
       const amount = parseFloat(args[0]);
       const recipient = args[1];
       if (isNaN(amount) || amount <= 0 || args.length < 2) {
-        return `<pre>Please enter a positive number and a valid destination address.
+        return <>Please enter a positive number and a valid destination address. <br />
 
     usage: transfer &lt;amount&gt; &lt;recipient&gt;
-        </pre>
-       `;
+        </>;
       }
       
       setAsyncOutput(`Processing transfer of ${amount}🌹 to ${recipient}...`);
@@ -444,11 +441,10 @@ const Terminal = () => {
     },
     balance: (args) => {
       if (args.length > 0) {
-        return `<pre>balance does not take additional arguments.
+        return <>balance does not take additional arguments. <br />
 
     usage: balance
-        </pre>
-       `;
+        </>;
       }
       if (roseBalance) {
         const numericRoseBalance = parseFloat(roseBalance);
@@ -458,11 +454,10 @@ const Terminal = () => {
     },
     address: (args) => {
       if (args.length > 0) {
-        return `<pre>address does not take additional arguments.
+        return <>address does not take additional arguments. <br />
 
     usage: address
-        </pre>
-       `;
+        </>;
       }
       if (signer) {
         return `Wallet address: ${signer.address}`;
@@ -471,11 +466,10 @@ const Terminal = () => {
     },
     clear: (args) => {
       if (args.length > 0) {
-        return `<pre>clear does not take additional arguments.
+        return <>clear does not take additional arguments. <br />
 
     usage: clear
-        </pre>
-       `;
+        </>;
       }
       setHistory([]);
       setShowTabHint(true);
@@ -483,22 +477,20 @@ const Terminal = () => {
     },
     exit: (args) => {
       if (args.length > 0) {
-        return `<pre>exit does not take additional arguments.
+          return <>exit does not take additional arguments. <br />
 
     usage: exit
-        </pre>
-       `;
+        </>;
       }
       window.close();
       return 'Closing terminal...';
     },
     snake: (args) => {
       if (args.length > 0) {
-        return `<pre>snake does not take additional arguments.
+        return <>snake does not take additional arguments. <br />
 
     usage: snake
-        </pre>
-       `;
+        </>;
       }
       setShowSnakeGame(true);
       return 'Starting Snake game...';
