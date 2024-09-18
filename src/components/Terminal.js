@@ -450,9 +450,9 @@ const Terminal = () => {
         </pre>
        `;
       }
-      if (nativeBalance) {
-        const numericBalance = parseFloat(nativeBalance);
-        return <>Current balance: {numericBalance.toFixed(6)}<EthIcon /></>;
+      if (roseBalance) {
+        const numericRoseBalance = parseFloat(roseBalance);
+        return <>Current balance: {numericRoseBalance.toFixed(6)}🌹</>;
       }
       return 'No wallet connected.';
     },
