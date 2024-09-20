@@ -12,7 +12,7 @@ const fadeIn = keyframes`
 
 const TradeContainer = styled.div`
   position: absolute;
-  top: 50%;
+  top: 55%;
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: rgba(0, 0, 0, 0.8);
