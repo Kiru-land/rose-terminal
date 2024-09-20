@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useWeb3 } from '../contexts/Web3Context';
 import { usePopUp } from '../contexts/PopUpContext';
-import { FaEthereum } from 'react-icons/fa6';
+import { FaEthereum, FaCaretDown, FaCaretUp } from 'react-icons/fa6';
 import { ethers } from 'ethers';
 
 const fadeIn = keyframes`
@@ -84,25 +84,33 @@ const Input = styled.input`
   font-size: 18px;
   outline: none;
   text-align: left;
-  font-family: inherit; // Add this line to inherit the font from the parent
-  maxLength={8}  // Add this line
-  padding-right: 40px; // Reduced padding for smaller max button
+  font-family: inherit;
+  maxLength={8}
+  padding-right: 40px;
+
+  &::placeholder {
+    font-size: 15px;
+    color: rgba(0, 255, 0, 0.5);
+  }
 `;
 
 const MaxButton = styled.button`
   position: absolute;
   right: 5px;
-  top: 5px;
-  background: none;
-  border: none;
-  color: rgba(0, 255, 0, 0.5); // Dimmed color
-  padding: 2px 4px;
-  font-size: 12px; // Increased from 10px to 12px
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid rgba(0, 255, 0, 0.3);
+  border-radius: 4px;
+  color: rgba(0, 255, 0, 0.5);
+  padding: 2px 6px;
+  font-size: 12px;
   cursor: pointer;
-  transition: color 0.2s;
-  text-transform: lowercase; // Ensure 'max' is lowercase
+  transition: all 0.2s;
+  text-transform: lowercase;
 
   &:hover {
+    background: rgba(0, 255, 0, 0.2);
     color: rgba(0, 255, 0, 0.8);
   }
 `;
@@ -116,20 +124,21 @@ const QuoteText = styled.p`
 
 const ExecuteButton = styled.button`
   width: 100%;
-  padding: 15px;
-  background-color: #000000; // Black background
-  color: ${props => props.disabled ? '#333333' : '#00ff00'}; // Dark grey when disabled, bright green otherwise
+  padding: 14px;
+  background-color: #000000;
+  color: ${props => props.disabled ? '#333333' : '#00ff00'};
   border: none;
   border-radius: 10px;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  text-transform: capitalize; // Changed from uppercase to capitalize
-  letter-spacing: 1px;
-  font-weight: bold;
+  text-transform: capitalize;
+  letter-spacing: 0px;
+  font-weight: 500;
   position: relative;
   overflow: hidden;
-  margin-top: 20px; // Add some margin to lower the button
+  margin-top: 20px;
+  font-family: inherit;
 
   &::before {
     content: '';
@@ -146,16 +155,16 @@ const ExecuteButton = styled.button`
   }
 
   &:hover::before {
-    opacity: 0.7;
+    opacity: ${props => props.disabled ? 0 : 0.7};
   }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+    transform: ${props => props.disabled ? 'none' : 'translateY(-2px)'};
+    box-shadow: ${props => props.disabled ? 'none' : '0 0 20px rgba(0, 255, 0, 0.5)'};
   }
 
   &:active {
-    transform: translateY(1px);
+    transform: ${props => props.disabled ? 'none' : 'translateY(1px)'};
   }
 `;
 
@@ -169,6 +178,9 @@ const SliderContainer = styled.div`
 const SliderRow = styled.div`
   display: flex;
   align-items: center;
+  overflow: hidden;
+  max-height: ${props => props.isVisible ? '50px' : '0'};
+  transition: max-height 0.3s ease-out;
 `;
 
 const Slider = styled.input`
@@ -208,12 +220,28 @@ const SliderLabel = styled.span`
   color: #00ff00;
   margin-left: 10px;
   min-width: 60px;
+  font-weight: 500;
+  font-size: 13px;
 `;
 
 const SliderTitle = styled.span`
-  color: rgba(0, 255, 0, 0.5);  // Dimmed green color
+  color: ${props => props.isOpen ? 'rgba(0, 255, 0, 0.5)' : 'grey'};
   font-size: 0.7em;
   margin-bottom: 5px;
+  cursor: pointer;
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  
+  &:hover {
+    color: ${props => props.isOpen ? 'rgba(0, 255, 0, 0.8)' : 'lightgrey'};
+  }
+`;
+
+const CaretIcon = styled.span`
+  margin-left: 5px;
+  display: flex;
+  align-items: center;
 `;
 
 const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
@@ -222,9 +250,10 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
   const [isEthOnTop, setIsEthOnTop] = useState(true);
   const { showPopUp } = usePopUp();
   const { signer, rose, balance: nativeBalance, roseBalance, reserve1 } = useWeb3();
-  const [slippage, setSlippage] = useState(3); // Default 3% slippage
+  const [slippage, setSlippage] = useState(3);
+  const [isSliderVisible, setIsSliderVisible] = useState(false);
 
-  const getQuote = async (amount) => {
+  const getQuote = useCallback(async () => {
     if (!signer || !rose || !amount) return null;
 
     try {
@@ -251,11 +280,11 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
       console.error('Error getting quote:', error);
       return null;
     }
-  };
+  }, [signer, rose, amount, isEthOnTop]);
 
   const fetchQuote = useCallback(async () => {
     if (amount) {
-      const newQuote = await getQuote(amount);
+      const newQuote = await getQuote();
       setQuote(newQuote);
       console.log(`Quote updated`);
     }
@@ -271,7 +300,7 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
   const handleAmountChange = async (e) => {
     const newAmount = e.target.value.slice(0, 8);
     setAmount(newAmount);
-    const newQuote = await getQuote(newAmount);
+    const newQuote = await getQuote();
     setQuote(newQuote);
     console.log(`Quote updated`);
   };
@@ -284,7 +313,7 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
 
   useEffect(() => {
     const updateQuote = async () => {
-      const newQuote = await getQuote(amount);
+      const newQuote = await getQuote();
       setQuote(newQuote);
     };
     updateQuote();
@@ -292,7 +321,11 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
 
   const handleSlippageChange = (e) => {
     const value = parseFloat(e.target.value);
-    setSlippage(Math.round(value * 10) / 10); // Round to 1 decimal place
+    setSlippage(Math.round(value * 10) / 10);
+  };
+
+  const toggleSliderVisibility = () => {
+    setIsSliderVisible(!isSliderVisible);
   };
 
   const handleExecute = async () => {
@@ -304,7 +337,6 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
     const amountInWei = ethers.parseEther(amount);
     const roundedAmount = Math.round(parseFloat(amount) * 1e6) / 1e6;
 
-    // Check if the amount is greater than 0 and meets the minimum requirement
     if (roundedAmount < 0.000001) {
       showPopUp(<>Amount too small. <br /> Minimum amount: 0.000001.</>);
       return;
@@ -322,7 +354,6 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
         }
 
         try {
-          // Set the processing message
           setAsyncOutput(<>Processing deposit of {amount}<FaEthereum /> ...</>);
 
           const roseContract = new ethers.Contract(
@@ -341,7 +372,6 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
 
           await tx.wait();
 
-          // Set the received message
           setAsyncOutput(<>Received {quote}🌹</>);
           showPopUp(<>Successfully deposited {amount}<FaEthereum /> for {quote}🌹</>);
         } catch (error) {
@@ -354,7 +384,6 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
             errorMessage = error.message;
           }
           
-          // Add this condition
           if (errorMessage.toLowerCase().includes('rejected')) {
             errorMessage = "User rejected the request";
           }
@@ -371,7 +400,6 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
           return;
         }
 
-        // Add check for maximum sell amount (2% of pool)
         const numericReserve1 = parseFloat(reserve1);
         if (parseFloat(amount) > (numericReserve1 / 20)) {
           showPopUp(`Amount too large, can only sell up to 5% of the pool at a time. Max sell: ${(numericReserve1/20).toFixed(6)}🌹`);
@@ -379,7 +407,6 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
         }
 
         try {
-          // Set the processing message
           setAsyncOutput(<>Processing withdrawal of {amount}🌹 ...</>);
 
           const roseContract = new ethers.Contract(
@@ -396,7 +423,6 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
 
           await tx.wait();
 
-          // Set the received message
           setAsyncOutput(<>Received {parseFloat(quote).toFixed(6)}<FaEthereum /></>);
           showPopUp(<>Successfully withdrawn {amount}🌹 for {parseFloat(quote).toFixed(6)}<FaEthereum /></>);
         } catch (error) {
@@ -409,7 +435,6 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
             errorMessage = error.message;
           }
           
-          // Add this condition
           if (errorMessage.toLowerCase().includes('rejected')) {
             errorMessage = "User rejected the request";
           }
@@ -427,11 +452,9 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
 
   const handleMaxClick = () => {
     if (isEthOnTop) {
-      // Set max ETH balance, leaving some for gas
-      const maxEth = parseFloat(nativeBalance) - 0.01; // Leave 0.01 ETH for gas
+      const maxEth = parseFloat(nativeBalance) - 0.01;
       setAmount(maxEth > 0 ? maxEth.toFixed(6) : '0');
     } else {
-      // Set max ROSE balance
       setAmount(roseBalance);
     }
   };
@@ -449,7 +472,7 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
               type="text" 
               value={amount} 
               onChange={handleAmountChange} 
-              onKeyPress={handleKeyPress}  // Add this line
+              onKeyPress={handleKeyPress} 
               placeholder="Enter amount"
             />
             <MaxButton onClick={handleMaxClick}>max</MaxButton>
@@ -467,8 +490,13 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
         </Panel>
       </TradeRow>
       <SliderContainer>
-        <SliderTitle>Slippage</SliderTitle>
-        <SliderRow>
+        <SliderTitle onClick={toggleSliderVisibility} isOpen={isSliderVisible}>
+          Slippage
+          <CaretIcon>
+            {isSliderVisible ? <FaCaretUp /> : <FaCaretDown />}
+          </CaretIcon>
+        </SliderTitle>
+        <SliderRow isVisible={isSliderVisible}>
           <Slider
             type="range"
             min="0.1"
@@ -482,7 +510,7 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
       </SliderContainer>
       <ExecuteButton 
         onClick={handleExecute} 
-        disabled={!amount} // Disable the button when amount is empty
+        disabled={!amount}
       >
         Execute
       </ExecuteButton>
