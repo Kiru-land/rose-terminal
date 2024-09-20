@@ -275,7 +275,9 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
 
     animateLogo(async () => {
       if (isEthOnTop) {
-        // ETH to ROSE (deposit)
+        ////////////////////////////////////////////////////////////////////
+        ///////////////////////////  Deposit  //////////////////////////////
+        ////////////////////////////////////////////////////////////////////
         const nativeBalanceInWei = ethers.parseEther(nativeBalance);
         if (amountInWei > nativeBalanceInWei) {
           showPopUp(<>Insufficient ETH balance. <br /> Current balance: {parseFloat(ethers.formatEther(nativeBalanceInWei)).toFixed(6)}<FaEthereum /></>);
@@ -292,8 +294,9 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
             signer
           );
 
-          const minQuote = ethers.parseEther(quote).mul(100 - slippage).div(100);
-          const tx = await roseContract.deposit(minQuote, {
+          const minQuote = parseFloat(quote) * (100 - slippage) / 100;
+          const minQuoteInWei = ethers.parseEther(minQuote.toString());
+          const tx = await roseContract.deposit(minQuoteInWei, {
             value: amountInWei
           });
 
@@ -323,7 +326,9 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
           setAsyncOutput('Error occurred during deposit. Please try again.');
         }
       } else {
-        // ROSE to ETH (withdraw)
+        ////////////////////////////////////////////////////////////////////
+        ///////////////////////////  Withdraw  /////////////////////////////
+        ////////////////////////////////////////////////////////////////////
         if (amountInWei > ethers.parseEther(roseBalance)) {
           showPopUp(<>Insufficient ROSE balance. <br /> Current balance: {parseFloat(roseBalance).toFixed(6)}🌹</>);
           return;
@@ -346,8 +351,9 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
             signer
           );
 
-          const minQuote = ethers.parseEther(quote).mul(100 - slippage).div(100);
-          const tx = await roseContract.withdraw(amountInWei, minQuote);
+          const minQuote = parseFloat(quote) * (100 - slippage) / 100;
+          const minQuoteInWei = ethers.parseEther(minQuote.toString());
+          const tx = await roseContract.withdraw(amountInWei, minQuoteInWei);
 
           showPopUp('Transaction sent. Waiting for confirmation...');
 
