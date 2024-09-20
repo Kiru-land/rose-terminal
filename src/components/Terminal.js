@@ -11,6 +11,7 @@ import { FaCircleInfo, FaEthereum, FaGithub } from 'react-icons/fa6';
 import Intro from './Intro';
 import SnakeGame from './SnakeGame';
 import { usePopUp } from '../contexts/PopUpContext';
+import Trade from './Trade';
 
 const TerminalContainer = styled.div`
   background-color: #1e1e1e;
@@ -209,13 +210,15 @@ const Terminal = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [showSnakeGame, setShowSnakeGame] = useState(false);
+  const [showTrade, setShowTrade] = useState(false);
+  const [tradeArgs, setTradeArgs] = useState([]);
   const inputRef = useRef(null);
   const terminalContentRef = useRef(null);
 
   const { isConnected, signer, provider, balance: nativeBalance , roseBalance, rose, reserve0, reserve1, alpha} = useWeb3();
   const { showPopUp } = usePopUp();
 
-  const availableCommands = ['buy', 'sell', 'transfer', 'balance', 'address', 'snake', 'clear', 'exit'];
+  const availableCommands = ['trade', 'transfer', 'balance', 'address', 'snake', 'clear', 'exit'];
 
   useEffect(() => {
     fetch(asciiArt)
@@ -233,99 +236,18 @@ const Terminal = () => {
     }
   }, [history]);
 
+  useEffect(() => {
+    if (showTrade) {
+      inputRef.current.focus();
+    }
+  }, [showTrade]);
+
   const animateLogo = async (callback) => {
     setIsAnimating(true);
     try {
       await callback();
     } finally {
       setIsAnimating(false);
-    }
-  };
-
-  const buyCall = async (amount) => {
-    const numericBalance = parseFloat(nativeBalance);
-    const roundedAmount = Math.round(amount * 1e6) / 1e6;
-    if (roundedAmount < 0.000001) {
-      return <>Amount too small. Minimum amount is 0.000001<EthIcon /></>;
-    }
-    if (amount > numericBalance) {
-      return <>Insufficient funds. Current balance: {numericBalance.toFixed(6)}<EthIcon /></>;
-    }
-  
-    try {
-      const tx = await signer.sendTransaction({
-        to: rose,
-        value: ethers.parseEther(amount.toString())
-      });
-      await tx.wait();
-      const roseContract = new ethers.Contract(
-        rose,
-        ['function balanceOf(address account) view returns (uint256)'],
-        provider
-      );
-      const updatedRoseBalance = await roseContract.balanceOf(signer.address);
-      const updatedNativeBalance = await provider.getBalance(signer.address);
-      const formattedUpdatedRoseBalance = ethers.formatEther(updatedRoseBalance);
-      const formattedUpdatedNativeBalance = ethers.formatEther(updatedNativeBalance);
-      return <>Received {(parseFloat(formattedUpdatedRoseBalance) - parseFloat(roseBalance)).toFixed(6)}🌹</>;
-    } catch (error) {
-      console.error("Error during buy:", error);
-      let errorMessage = "An error occurred during the transaction.";
-      
-      if (error.reason) {
-        errorMessage = error.reason;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      // Show the error in a popup
-      showPopUp(errorMessage);
-      
-      return `Error during buy. Please try again.`;
-    }
-  };
-
-  const sellCall = async (amount) => {
-    const numericBalance = parseFloat(nativeBalance);
-    const numericRoseBalance = parseFloat(roseBalance);
-    const roundedAmount = Math.round(amount * 1e6) / 1e6;
-    if (roundedAmount < 0.000001) {
-      return `Amount too small. Minimum amount is 0.000001🌹`;
-    }
-    if (amount > numericRoseBalance) {
-      return `Insufficient funds. Current balance: ${numericRoseBalance.toFixed(6)}🌹`;
-    }
-    const numericReserve1 = parseFloat(reserve1);
-    if (amount > (numericReserve1 / 50)) {
-      return `Amount too large, can only sell up to 2% of the pool. Max sell: ${(numericReserve1/50).toFixed(6)}🌹`;
-    }
-    const roseContract = new ethers.Contract(
-      rose,
-      ['function transfer(address to, uint256 amount) returns (bool)'],
-      signer
-    );
-    try {
-      const tx = await roseContract.transfer(rose, ethers.parseUnits(amount.toString(), 18));
-      await tx.wait();
-      
-      const updatedNativeBalance = await provider.getBalance(signer.address);
-      const formattedUpdatedBalance = ethers.formatEther(updatedNativeBalance);
-      
-      return <>Received {(parseFloat(formattedUpdatedBalance) - numericBalance).toFixed(6)}<EthIcon /></>;
-    } catch (error) {
-      console.error("Error during sell:", error);
-      let errorMessage = "An error occurred during the transaction.";
-      
-      if (error.reason) {
-        errorMessage = error.reason;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      // Show the error in a popup
-      showPopUp(errorMessage);
-      
-      return `Error during sell. Please try again.`;
     }
   };
 
@@ -347,7 +269,9 @@ const Terminal = () => {
     }
 
     if (!resolvedAddress) {
-      return <>Invalid recipient address or unresolved ENS name. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
+
+      return <>Invalid recipient address or unresolved ENS name. <br /> <br /> &nbsp; &nbsp; &nbsp; &nbsp;
+
 
     usage: transfer &lt;amount&gt; &lt;recipient&gt;
 
@@ -368,56 +292,30 @@ const Terminal = () => {
     } catch (error) {
       console.error("Error during transfer:", error);
       let errorMessage = "An error occurred during the transfer.";
-      
+
       if (error.reason) {
         errorMessage = error.reason;
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       // Show the error in a popup
       showPopUp(errorMessage);
-      
+
       return `Error during transfer. Please try again.`;
     }
   };
 
   const commands = {
-    buy: (args) => {
-      const amount = parseFloat(args[0]);
-      if (isNaN(amount) || amount <= 0) {
-        return <>Invalid amount. Please enter a positive number. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
-            
-    usage: buy &lt;amount&gt;
+    trade: (args) => {
+      if (args.length > 0) {
+        return <>trade does not take additional arguments. <br /> <br /> &nbsp; &nbsp;
+
+    usage: trade
         </>;
       }
-      
-      setAsyncOutput(<>Processing deposit of {amount}<EthIcon />...</>);
-
-      animateLogo(async () => {
-        const result = await buyCall(amount);
-        setAsyncOutput(result);
-      });
-
-      return null;
-    },
-    sell: (args) => {
-      const amount = parseFloat(args[0]);
-      if (isNaN(amount) || amount <= 0) {
-        return <>Invalid amount. Please enter a positive number. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
-
-    usage: sell &lt;amount&gt;
-        </>;
-      }
-      
-      setAsyncOutput(`Processing sale of ${amount}🌹...`);
-
-      animateLogo(async () => {
-        const result = await sellCall(amount);
-        setAsyncOutput(result);
-      });
-
-      return null;
+      setShowTrade(true);
+      return 'Opening trade interface...';
     },
     transfer: (args) => {
       const amount = parseFloat(args[0]);
@@ -447,7 +345,8 @@ const Terminal = () => {
       }
       if (roseBalance) {
         const numericRoseBalance = parseFloat(roseBalance);
-        return <>Current balance: {numericRoseBalance.toFixed(6)}🌹</>;
+        const numericEthBalance = parseFloat(nativeBalance);
+        return <>Current ETH balance: {numericEthBalance.toFixed(6)} <br /> <br /> Current ROSE balance: {numericRoseBalance.toFixed(6)}🌹</>;
       }
       return 'No wallet connected.';
     },
@@ -512,7 +411,7 @@ const Terminal = () => {
         setCommandHistory(prev => [...prev, trimmedInput]);
         setHistoryIndex(-1);
       }
-      const [command, ...args] = trimmedInput.split(' ');
+      const [command, ...args] = trimmedInput.toLowerCase().split(' ');
       setHistory([...history, { type: 'command', content: trimmedInput }]);
 
       if (commands[command]) {
@@ -691,7 +590,7 @@ const Terminal = () => {
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            disabled={showSnakeGame}
+            disabled={showSnakeGame || showTrade}
           />
           {showTabHint && <TabHint>press tab to see options</TabHint>}
         </InputContainer>
@@ -701,6 +600,13 @@ const Terminal = () => {
       </TerminalContent>
       <Chart data={chartData} />
       <BottomBar />
+      {showTrade && (
+        <Trade 
+          onClose={() => setShowTrade(false)} 
+          animateLogo={animateLogo} 
+          setAsyncOutput={setAsyncOutput}
+        />
+      )}
       {showSnakeGame && <SnakeGame onClose={() => setShowSnakeGame(false)} />}
     </TerminalContainer>
   );
