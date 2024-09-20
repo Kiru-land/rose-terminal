@@ -86,7 +86,7 @@ const TabCompletion = ({ options, inputText, onSelect }) => {
           <CompletionItem
             key={option}
             className={index === selectedIndex ? 'selected' : ''}
-            onClick={() => onSelect(option)}
+            onClick={() => onSelect(option.toLowerCase())}
           >
             {option}
           </CompletionItem>
