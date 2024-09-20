@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useWeb3 } from '../contexts/Web3Context';
 import { usePopUp } from '../contexts/PopUpContext';
@@ -72,6 +72,7 @@ const Panel = styled.div`
 
 const InputWrapper = styled.div`
   flex-grow: 1;
+  position: relative;
 `;
 
 const Input = styled.input`
@@ -85,6 +86,25 @@ const Input = styled.input`
   text-align: left;
   font-family: inherit; // Add this line to inherit the font from the parent
   maxLength={8}  // Add this line
+  padding-right: 40px; // Reduced padding for smaller max button
+`;
+
+const MaxButton = styled.button`
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  background: none;
+  border: none;
+  color: rgba(0, 255, 0, 0.5); // Dimmed color
+  padding: 2px 4px;
+  font-size: 12px; // Increased from 10px to 12px
+  cursor: pointer;
+  transition: color 0.2s;
+  text-transform: lowercase; // Ensure 'max' is lowercase
+
+  &:hover {
+    color: rgba(0, 255, 0, 0.8);
+  }
 `;
 
 const QuoteText = styled.p`
@@ -104,11 +124,12 @@ const ExecuteButton = styled.button`
   font-size: 18px;
   cursor: pointer;
   transition: all 0.3s ease;
-  text-transform: uppercase;
+  text-transform: capitalize; // Changed from uppercase to capitalize
   letter-spacing: 1px;
   font-weight: bold;
   position: relative;
   overflow: hidden;
+  margin-top: 20px; // Add some margin to lower the button
 
   &::before {
     content: '';
@@ -191,7 +212,7 @@ const SliderLabel = styled.span`
 
 const SliderTitle = styled.span`
   color: rgba(0, 255, 0, 0.5);  // Dimmed green color
-  font-size: 0.8em;
+  font-size: 0.7em;
   margin-bottom: 5px;
 `;
 
@@ -232,11 +253,27 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
     }
   };
 
+  const fetchQuote = useCallback(async () => {
+    if (amount) {
+      const newQuote = await getQuote(amount);
+      setQuote(newQuote);
+      console.log(`Quote updated`);
+    }
+  }, [amount, getQuote]);
+
+  useEffect(() => {
+    if (amount) {
+      const intervalId = setInterval(fetchQuote, 5000);
+      return () => clearInterval(intervalId);
+    }
+  }, [amount, fetchQuote]);
+
   const handleAmountChange = async (e) => {
     const newAmount = e.target.value.slice(0, 8);
     setAmount(newAmount);
     const newQuote = await getQuote(newAmount);
     setQuote(newQuote);
+    console.log(`Quote updated`);
   };
 
   const handleKeyPress = (event) => {
@@ -388,6 +425,17 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
     setIsEthOnTop(!isEthOnTop);
   };
 
+  const handleMaxClick = () => {
+    if (isEthOnTop) {
+      // Set max ETH balance, leaving some for gas
+      const maxEth = parseFloat(nativeBalance) - 0.01; // Leave 0.01 ETH for gas
+      setAmount(maxEth > 0 ? maxEth.toFixed(6) : '0');
+    } else {
+      // Set max ROSE balance
+      setAmount(roseBalance);
+    }
+  };
+
   return (
     <TradeContainer>
       <CloseButton onClick={onClose}>&times;</CloseButton>
@@ -396,13 +444,16 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
           {isEthOnTop ? <FaEthereum /> : '🌹'}
         </IconButton>
         <Panel>
-          <Input 
-            type="text" 
-            value={amount} 
-            onChange={handleAmountChange} 
-            onKeyPress={handleKeyPress}  // Add this line
-            placeholder="Enter amount"
-          />
+          <InputWrapper>
+            <Input 
+              type="text" 
+              value={amount} 
+              onChange={handleAmountChange} 
+              onKeyPress={handleKeyPress}  // Add this line
+              placeholder="Enter amount"
+            />
+            <MaxButton onClick={handleMaxClick}>max</MaxButton>
+          </InputWrapper>
         </Panel>
       </TradeRow>
       <TradeRow>
