@@ -41,8 +41,9 @@ const AsciiArtContainer = styled.pre`
 `;
 
 const ClickableAsciiArtContainer = styled(AsciiArtContainer)`
-  cursor: pointer;
   transition: opacity 0.3s ease;
+  width: 20vw;
+  margin: auto;
 
   &:hover {
     opacity: 0.8;
@@ -418,7 +419,12 @@ const Terminal = () => {
         let out = '';
         if (!isConnected && command !== 'exit') {
           out = 'Please connect your wallet.';
-        } else {
+        } else if (provider && provider.network) {
+            const chainId = provider.network.chainId;
+            if (chainId !== 1n && chainId !== 17000n) {
+              return "Change network to the Holesky Testnet or Ethereum Mainnet";
+            }
+          } else {
           out = commands[command](args);
         }
         if (out !== null) {
