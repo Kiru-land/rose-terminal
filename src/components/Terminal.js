@@ -269,13 +269,14 @@ const Terminal = () => {
     }
 
     if (!resolvedAddress) {
+
       return <>Invalid recipient address or unresolved ENS name. <br /> <br /> &nbsp; &nbsp; &nbsp; &nbsp;
+
 
     usage: transfer &lt;amount&gt; &lt;recipient&gt;
 
     example: transfer 10 rosemoney.eth
-        </>
-       ;
+        </>;
     }
 
     const roseContract = new ethers.Contract(
@@ -320,7 +321,7 @@ const Terminal = () => {
       const amount = parseFloat(args[0]);
       const recipient = args[1];
       if (isNaN(amount) || amount <= 0 || args.length < 2) {
-        return <>Please enter a positive number and a valid destination address. <br /> <br /> &nbsp; &nbsp;
+        return <>Please enter a positive number and a valid destination address. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
 
     usage: transfer &lt;amount&gt; &lt;recipient&gt;
         </>;
@@ -337,7 +338,7 @@ const Terminal = () => {
     },
     balance: (args) => {
       if (args.length > 0) {
-        return <>balance does not take additional arguments. <br /> <br /> &nbsp; &nbsp;
+        return <>balance does not take additional arguments. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
 
     usage: balance
         </>;
@@ -351,7 +352,7 @@ const Terminal = () => {
     },
     address: (args) => {
       if (args.length > 0) {
-        return <>address does not take additional arguments. <br /> <br /> &nbsp; &nbsp;
+        return <>address does not take additional arguments. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
 
     usage: address
         </>;
@@ -363,7 +364,7 @@ const Terminal = () => {
     },
     clear: (args) => {
       if (args.length > 0) {
-        return <>clear does not take additional arguments. <br /> <br /> &nbsp; &nbsp;
+        return <>clear does not take additional arguments. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
 
     usage: clear
         </>;
@@ -374,7 +375,7 @@ const Terminal = () => {
     },
     exit: (args) => {
       if (args.length > 0) {
-          return <>exit does not take additional arguments. <br /> <br /> &nbsp; &nbsp;
+          return <>exit does not take additional arguments. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
 
     usage: exit
         </>;
@@ -384,7 +385,7 @@ const Terminal = () => {
     },
     snake: (args) => {
       if (args.length > 0) {
-        return <>snake does not take additional arguments. <br /> <br /> &nbsp; &nbsp;
+        return <>snake does not take additional arguments. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
 
     usage: snake
         </>;
