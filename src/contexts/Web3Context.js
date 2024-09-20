@@ -3,8 +3,8 @@ import { ethers } from 'ethers';
 
 const Web3Context = createContext();
 
-const ROSE_TOKEN_ADDRESS = '0x1234567890123456789012345678901234567890';
-const ROSE_TOKEN_TESTNET_ADDRESS = '0x476f53726555F0724977F823115866eCA063cE85';
+const ROSE_TOKEN_ADDRESS = '0x0eA2cA5122381C6A4e79368F08a07Eca46bCe300';
+const ROSE_TOKEN_TESTNET_ADDRESS = '0xdB02B6a7cfe9d4DE7D2dC585EFc27a24b6345aD1';
 
 export const Web3Provider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
