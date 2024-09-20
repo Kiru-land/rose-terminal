@@ -344,7 +344,8 @@ const Terminal = () => {
       }
       if (roseBalance) {
         const numericRoseBalance = parseFloat(roseBalance);
-        return <>Current balance: {numericRoseBalance.toFixed(6)}🌹</>;
+        const numericEthBalance = parseFloat(nativeBalance);
+        return <>Current ETH balance: {numericEthBalance.toFixed(6)} <br /> <br /> Current ROSE balance: {numericRoseBalance.toFixed(6)}🌹</>;
       }
       return 'No wallet connected.';
     },
@@ -409,7 +410,7 @@ const Terminal = () => {
         setCommandHistory(prev => [...prev, trimmedInput]);
         setHistoryIndex(-1);
       }
-      const [command, ...args] = trimmedInput.split(' ');
+      const [command, ...args] = trimmedInput.toLowerCase().split(' ');
       setHistory([...history, { type: 'command', content: trimmedInput }]);
 
       if (commands[command]) {
@@ -598,7 +599,13 @@ const Terminal = () => {
       </TerminalContent>
       <Chart data={chartData} />
       <BottomBar />
-      {showTrade && <Trade onClose={() => setShowTrade(false)} />}
+      {showTrade && (
+        <Trade 
+          onClose={() => setShowTrade(false)} 
+          animateLogo={animateLogo} 
+          setAsyncOutput={setAsyncOutput}
+        />
+      )}
       {showSnakeGame && <SnakeGame onClose={() => setShowSnakeGame(false)} />}
     </TerminalContainer>
   );
