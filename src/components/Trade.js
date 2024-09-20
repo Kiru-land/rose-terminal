@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useWeb3 } from '../contexts/Web3Context';
 import { usePopUp } from '../contexts/PopUpContext';
-import { FaEthereum, FaCaretDown, FaCaretUp } from 'react-icons/fa6';
+import { FaEthereum } from 'react-icons/fa6';
 import { ethers } from 'ethers';
 
 const fadeIn = keyframes`
@@ -238,10 +238,11 @@ const SliderTitle = styled.span`
   }
 `;
 
-const CaretIcon = styled.span`
+const ArrowIcon = styled.span`
   margin-left: 5px;
-  display: flex;
-  align-items: center;
+  display: inline-block;
+  transition: transform 0.3s ease;
+  transform: ${props => props.isOpen ? 'rotate(-90deg)' : 'rotate(90deg)'};
 `;
 
 const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
@@ -492,9 +493,9 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
       <SliderContainer>
         <SliderTitle onClick={toggleSliderVisibility} isOpen={isSliderVisible}>
           Slippage
-          <CaretIcon>
-            {isSliderVisible ? <FaCaretUp /> : <FaCaretDown />}
-          </CaretIcon>
+          <ArrowIcon isOpen={isSliderVisible}>
+            &#10095;
+          </ArrowIcon>
         </SliderTitle>
         <SliderRow isVisible={isSliderVisible}>
           <Slider
