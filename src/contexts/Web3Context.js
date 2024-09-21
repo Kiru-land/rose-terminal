@@ -3,6 +3,8 @@ import { ethers } from 'ethers';
 
 const Web3Context = createContext();
 
+const SALE_ADDRESS = '0x1234567890123456789012345678901234567890';
+const SALE_ADDRESS_TESTNET = '0x1234567890123456789012345678901234567890';
 const ROSE_TOKEN_ADDRESS = '0x0eA2cA5122381C6A4e79368F08a07Eca46bCe300';
 const ROSE_TOKEN_TESTNET_ADDRESS = '0xdB02B6a7cfe9d4DE7D2dC585EFc27a24b6345aD1';
 
@@ -14,6 +16,7 @@ export const Web3Provider = ({ children }) => {
   const [chainId, setChainId] = useState(null);
   const [signer, setSigner] = useState(null);
   const [rose, setRose] = useState(null);
+  const [sale, setSale] = useState(null);
   const [reserve0, setReserve0] = useState('0');
   const [reserve1, setReserve1] = useState('0');
   const [alpha, setAlpha] = useState('0');
@@ -30,6 +33,7 @@ export const Web3Provider = ({ children }) => {
         const newChainId = network.chainId;
 
         const rose = newChainId === 1n ? ROSE_TOKEN_ADDRESS : newChainId === 17000n ? ROSE_TOKEN_TESTNET_ADDRESS : null;
+        const sale = newChainId === 1n ? SALE_ADDRESS : newChainId === 17000n ? SALE_ADDRESS_TESTNET : null;
         const roseContract = new ethers.Contract(
           rose,
           ['function balanceOf(address) view returns (uint256)'],
@@ -65,6 +69,7 @@ export const Web3Provider = ({ children }) => {
         setBalance(ethers.formatEther(balance));
         setRoseBalance(ethers.formatEther(roseBalance));
         setRose(rose);
+        setSale(sale);
         console.log('Web3 state updated');
       } catch (error) {
         console.error('Error updating Web3 state:', error);
@@ -142,7 +147,8 @@ export const Web3Provider = ({ children }) => {
       chainId,
       reserve0,
       reserve1,
-      alpha
+      alpha,
+      sale
     }}>
       {children}
     </Web3Context.Provider>

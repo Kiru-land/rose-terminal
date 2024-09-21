@@ -13,6 +13,7 @@ import SnakeGame from './SnakeGame';
 import { usePopUp } from '../contexts/PopUpContext';
 import Trade from './Trade';
 import Transfer from './Transfer';
+import Sale from './Sale';
 
 const TerminalContainer = styled.div`
   background-color: #1e1e1e;
@@ -214,6 +215,7 @@ const Terminal = () => {
   const [showSnakeGame, setShowSnakeGame] = useState(false);
   const [showTrade, setShowTrade] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
+  const [showSale, setShowSale] = useState(false);
   const [tradeArgs, setTradeArgs] = useState([]);
   const inputRef = useRef(null);
   const terminalContentRef = useRef(null);
@@ -221,7 +223,7 @@ const Terminal = () => {
   const { isConnected, signer, provider, balance: nativeBalance , roseBalance, rose, reserve0, reserve1, alpha} = useWeb3();
   const { showPopUp } = usePopUp();
 
-  const availableCommands = ['trade', 'transfer', 'balance', 'address', 'snake', 'clear', 'exit'];
+  const availableCommands = ['trade', 'transfer', 'balance', 'address', 'snake', 'clear', 'exit', 'sale'];
 
   useEffect(() => {
     fetch(asciiArt)
@@ -386,6 +388,16 @@ const Terminal = () => {
       }
       setShowSnakeGame(true);
       return 'Starting Snake game...';
+    },
+    sale: (args) => {
+      if (args.length > 0) {
+        return <>sale does not take additional arguments. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
+
+    usage: sale
+        </>;
+      }
+      setShowSale(true);
+      return 'Opening sale interface...';
     },
   };
 
@@ -589,7 +601,7 @@ const Terminal = () => {
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            disabled={showSnakeGame || showTrade || showTransfer}
+            disabled={showSnakeGame || showTrade || showTransfer || showSale}
           />
           {showTabHint && <TabHint>press tab to see options</TabHint>}
         </InputContainer>
@@ -609,6 +621,13 @@ const Terminal = () => {
       {showTransfer && (
         <Transfer 
           onClose={() => setShowTransfer(false)} 
+          animateLogo={animateLogo} 
+          setAsyncOutput={setAsyncOutput}
+        />
+      )}
+      {showSale && (
+        <Sale 
+          onClose={() => setShowSale(false)} 
           animateLogo={animateLogo} 
           setAsyncOutput={setAsyncOutput}
         />
