@@ -12,6 +12,7 @@ import Intro from './Intro';
 import SnakeGame from './SnakeGame';
 import { usePopUp } from '../contexts/PopUpContext';
 import Trade from './Trade';
+import Transfer from './Transfer';
 
 const TerminalContainer = styled.div`
   background-color: #1e1e1e;
@@ -212,6 +213,7 @@ const Terminal = () => {
   const [showIntro, setShowIntro] = useState(true);
   const [showSnakeGame, setShowSnakeGame] = useState(false);
   const [showTrade, setShowTrade] = useState(false);
+  const [showTransfer, setShowTransfer] = useState(false);
   const [tradeArgs, setTradeArgs] = useState([]);
   const inputRef = useRef(null);
   const terminalContentRef = useRef(null);
@@ -319,23 +321,14 @@ const Terminal = () => {
       return 'Opening trade interface...';
     },
     transfer: (args) => {
-      const amount = parseFloat(args[0]);
-      const recipient = args[1];
-      if (isNaN(amount) || amount <= 0 || args.length < 2) {
-        return <>Please enter a positive number and a valid destination address. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
+      if (args.length > 0) {
+        return <>transfer does not take additional arguments. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
 
-    usage: transfer &lt;amount&gt; &lt;recipient&gt;
+    usage: transfer
         </>;
       }
-      
-      setAsyncOutput(`Processing transfer of ${amount}🌹 to ${recipient}...`);
-
-      animateLogo(async () => {
-        const result = await transferCall(amount, recipient);
-        setAsyncOutput(result);
-      });
-
-      return null;
+      setShowTransfer(true);
+      return 'Opening transfer interface...';
     },
     balance: (args) => {
       if (args.length > 0) {
@@ -596,7 +589,7 @@ const Terminal = () => {
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            disabled={showSnakeGame || showTrade}
+            disabled={showSnakeGame || showTrade || showTransfer}
           />
           {showTabHint && <TabHint>press tab to see options</TabHint>}
         </InputContainer>
@@ -609,6 +602,13 @@ const Terminal = () => {
       {showTrade && (
         <Trade 
           onClose={() => setShowTrade(false)} 
+          animateLogo={animateLogo} 
+          setAsyncOutput={setAsyncOutput}
+        />
+      )}
+      {showTransfer && (
+        <Transfer 
+          onClose={() => setShowTransfer(false)} 
           animateLogo={animateLogo} 
           setAsyncOutput={setAsyncOutput}
         />
