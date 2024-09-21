@@ -64,8 +64,8 @@ const IconButton = styled.button`
 const Panel = styled.div`
   background-color: rgba(0, 255, 0, 0.1);
   border-radius: 15px;
-  padding: 15px;
-  height: 60px;
+  padding: 12px;
+  height: 50px;
   display: flex;
   align-items: center;
   flex-grow: 1;
@@ -78,7 +78,7 @@ const InputWrapper = styled.div`
 
 const Input = styled.input`
   width: 100%;
-  padding: 10px;
+  padding: 8px;
   border: none;
   background-color: transparent;
   color: #00ff00;
@@ -222,6 +222,7 @@ const DashboardValue = styled.span`
   font-weight: normal;
   display: flex;
   align-items: center;
+  position: relative;
 `;
 
 const HelpIcon = styled(FaInfoCircle)`
@@ -247,9 +248,8 @@ const HelpTooltip = styled.div`
   visibility: ${props => props.visible ? 'visible' : 'hidden'};
   opacity: ${props => props.visible ? 1 : 0};
   transition: visibility 0.2s, opacity 0.2s;
-  left: 100%;
+  right: -400px;
   top: 0;
-  margin-left: 10px;
   box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
   line-height: 1.4;
   border: 1px solid rgba(0, 255, 0, 0.3);
@@ -279,6 +279,26 @@ const TooltipLabel = styled.p`
   margin: 0;
 `;
 
+const ChartTooltip = styled.div`
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: #00ff00;
+  padding: 15px;
+  border-radius: 15px;
+  font-size: 12px;
+  max-width: 300px;
+  width: 300px;
+  z-index: 1000;
+  visibility: ${props => props.visible ? 'visible' : 'hidden'};
+  opacity: ${props => props.visible ? 1 : 0};
+  transition: visibility 0.2s, opacity 0.2s;
+  right: -320px;
+  top: 0;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+  line-height: 1.4;
+  border: 1px solid rgba(0, 255, 0, 0.3);
+`;
+
 const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
   const [amount, setAmount] = useState('');
   const [isDashboardVisible, setIsDashboardVisible] = useState(false);
@@ -286,6 +306,7 @@ const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const [totalRaised, setTotalRaised] = useState('0');
   const [expectedMarketCap, setExpectedMarketCap] = useState('0');
+  const [activeTooltip, setActiveTooltip] = useState(null);
 
   const { showPopUp } = usePopUp();
   const { signer, balance: nativeBalance, sale: saleAddress, provider } = useWeb3();
@@ -329,12 +350,27 @@ const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
 
   const [activeIndex, setActiveIndex] = useState(null);
 
-  const onPieEnter = (_, index) => {
+  const handlePieEnter = (_, index) => {
     setActiveIndex(index);
+    setActiveTooltip(data[index].name);
   };
 
-  const onPieLeave = () => {
+  const handlePieLeave = () => {
     setActiveIndex(null);
+    setActiveTooltip(null);
+  };
+
+  const getTooltipContent = (name) => {
+    switch (name) {
+      case 'Fair Launch':
+        return 'Percentage of the ROSE total supply to be sold into the Fair Launch';
+      case 'Liquidity':
+        return 'Percentage of ROSE going into the custom aAMM liquidity pool';
+      case 'Treasury':
+        return 'Funds reserved for future incentivisation, strategic investing, fund development';
+      default:
+        return '';
+    }
   };
 
   const handleAmountChange = (e) => {
@@ -470,14 +506,6 @@ const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
                   onMouseEnter={() => setShowTooltip(true)}
                   onMouseLeave={() => setShowTooltip(false)}
                 />
-                <HelpTooltip visible={showTooltip}>
-                  <strong>Proportional Oversubscribed Capped Sale</strong><br /><br />
-                  This Fair Launch has a <em>soft</em> and <em>hard</em> cap. <br /> <br />
-                  1.) If the total amount raised is smaller than the soft cap, all participation gets reimbursed. <br /> <br />
-                  2.) If the amount raised is bigger than the hard cap, the excess tokens get proportionally reimbursed to every user.<br /> <br />
-                  Participants receive a part of the 75% of ROSE tokens sold based on their proportional share of the total <FaEthereum /> submitted.<br /> <br />
-                  <em>Note: The Implied Market Cap will increase with the contribution amount until it reaches the Hard Cap of 1000<FaEthereum />. The Implied Market Cap will vary between 800<FaEthereum /> for the Soft Cap until reaching 4000<FaEthereum /> at the Hard Cap.</em>
-                </HelpTooltip>
               </DashboardValue>
             </DashboardRow>
             <DashboardRow isVisible={isContentVisible} delay={0.2}>
@@ -508,8 +536,8 @@ const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
                   dataKey="value"
                   strokeWidth={0}
                   cornerRadius={8}
-                  onMouseEnter={onPieEnter}
-                  onMouseLeave={onPieLeave}
+                  onMouseEnter={handlePieEnter}
+                  onMouseLeave={handlePieLeave}
                 >
                   {data.map((entry, index) => (
                     <Cell 
@@ -535,6 +563,18 @@ const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
       >
         Participate
       </ExecuteButton>
+      <HelpTooltip visible={showTooltip}>
+        <strong>Proportional Oversubscribed Capped Sale</strong><br /><br />
+        This Fair Launch has a <em>soft</em> and <em>hard</em> cap. <br /> <br />
+        1.) If the total amount raised is smaller than the soft cap, all participation gets reimbursed. <br /> <br />
+        2.) If the amount raised is bigger than the hard cap, the excess tokens get proportionally reimbursed to every user.<br /> <br />
+        Participants receive a part of the 75% of ROSE tokens sold based on their proportional share of the total <FaEthereum /> submitted.<br /> <br />
+        <em>Note: The Implied Market Cap will increase with the contribution amount until it reaches the Hard Cap of 1000<FaEthereum />. The Implied Market Cap will vary between 800<FaEthereum /> for the Soft Cap until reaching 4000<FaEthereum /> at the Hard Cap.</em>
+      </HelpTooltip>
+      <ChartTooltip visible={activeTooltip !== null}>
+        <strong>{activeTooltip}</strong><br />
+        {getTooltipContent(activeTooltip)}
+      </ChartTooltip>
     </SaleContainer>
   );
 };
