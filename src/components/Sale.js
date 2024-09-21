@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useWeb3 } from '../contexts/Web3Context';
 import { usePopUp } from '../contexts/PopUpContext';
-import { FaEthereum, FaQuestionCircle } from 'react-icons/fa';
+import { FaEthereum, FaInfoCircle } from 'react-icons/fa';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { ethers } from 'ethers';
 
@@ -210,15 +210,15 @@ const DashboardRow = styled.div`
 
 const DashboardLabel = styled.span`
   opacity: 0.7;
-  display: flex;
-  align-items: center;
 `;
 
 const DashboardValue = styled.span`
   font-weight: normal;
+  display: flex;
+  align-items: center;
 `;
 
-const HelpIcon = styled(FaQuestionCircle)`
+const HelpIcon = styled(FaInfoCircle)`
   margin-left: 5px;
   opacity: 0.7;
   transition: opacity 0.2s;
@@ -235,8 +235,8 @@ const HelpTooltip = styled.div`
   padding: 15px;
   border-radius: 15px;
   font-size: 12px;
-  max-width: 400px;
-  width: 400px;
+  max-width: 380px;
+  width: 380px;
   z-index: 1000;
   visibility: ${props => props.visible ? 'visible' : 'hidden'};
   opacity: ${props => props.visible ? 1 : 0};
@@ -274,13 +274,39 @@ const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
   const [amount, setAmount] = useState('');
   const [isDashboardVisible, setIsDashboardVisible] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-  const { showPopUp } = usePopUp();
-  const { signer, balance: nativeBalance, sale: saleAddress } = useWeb3();
+  const [totalRaised, setTotalRaised] = useState('0');
+  const [expectedMarketCap, setExpectedMarketCap] = useState('0');
 
-  const softCap = "200 ETH";
-  const hardCap = "1000 ETH";
-  const amountRaised = "75 ETH";
-  const expectedMarketCap = "$1m";
+  const { showPopUp } = usePopUp();
+  const { signer, balance: nativeBalance, sale: saleAddress, provider } = useWeb3();
+
+  const fetchSaleData = async () => {
+    if (provider && saleAddress) {
+      const saleContract = new ethers.Contract(
+        saleAddress,
+        ['function totalRaised() view returns (uint256)'],
+        provider
+      );
+
+      try {
+        const raised = await saleContract.totalRaised();
+        const raisedEth = ethers.formatEther(raised);
+        setTotalRaised(raisedEth);
+        setExpectedMarketCap((parseFloat(raisedEth) * 4).toFixed(6));
+      } catch (error) {
+        console.error('Error fetching sale data:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchSaleData();
+    const interval = setInterval(fetchSaleData, 15000); // Update every 15 seconds
+    return () => clearInterval(interval);
+  }, [provider, saleAddress]);
+
+  const softCap = "200";
+  const hardCap = "1000";
 
   const data = [
     { name: 'Fair Launch', value: 75 },
@@ -410,8 +436,9 @@ const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
         <DashboardContent isVisible={isDashboardVisible}>
           <Dashboard>
             <DashboardRow>
-              <DashboardLabel>
-                Type:
+              <DashboardLabel>Type:</DashboardLabel>
+              <DashboardValue>
+                Fair Launch
                 <HelpIcon 
                   onMouseEnter={() => setShowTooltip(true)}
                   onMouseLeave={() => setShowTooltip(false)}
@@ -422,26 +449,25 @@ const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
                   1.) If the total amount raised is smaller than the soft cap, all participation gets reimbursed. <br /> <br />
                   2.) If the amount raised is bigger than the hard cap, the excess tokens get proportionally reimbursed to every user.<br /> <br />
                   Participants receive a part of the 75% of ROSE tokens sold based on their proportional share of the total <FaEthereum /> submitted.<br /> <br />
-                  <em>Note: This expected total market cap will vary between 800<FaEthereum /> for the soft cap and 4000<FaEthereum /> for the hard cap.</em>
+                  <em>Note: The Implied Market Cap will increase with the contribution amount until it reaches the Hard Cap of 1000<FaEthereum />. The Implied Market Cap will vary between 800<FaEthereum /> for the Soft Cap until reaching 4000<FaEthereum /> at the Hard Cap.</em>
                 </HelpTooltip>
-              </DashboardLabel>
-              <DashboardValue>Fair Launch</DashboardValue>
+              </DashboardValue>
             </DashboardRow>
             <DashboardRow>
               <DashboardLabel>Soft Cap:</DashboardLabel>
-              <DashboardValue>{softCap}</DashboardValue>
+              <DashboardValue>{softCap}<FaEthereum /></DashboardValue>
             </DashboardRow>
             <DashboardRow>
               <DashboardLabel>Hard Cap:</DashboardLabel>
-              <DashboardValue>{hardCap}</DashboardValue>
+              <DashboardValue>{hardCap}<FaEthereum /></DashboardValue>
             </DashboardRow>
             <DashboardRow>
               <DashboardLabel>Amount Raised:</DashboardLabel>
-              <DashboardValue>{amountRaised}</DashboardValue>
+              <DashboardValue>{totalRaised}<FaEthereum /></DashboardValue>
             </DashboardRow>
             <DashboardRow>
-              <DashboardLabel>Expected Market Cap:</DashboardLabel>
-              <DashboardValue>{expectedMarketCap}</DashboardValue>
+              <DashboardLabel>Implied Market Cap:</DashboardLabel>
+              <DashboardValue>{expectedMarketCap}<FaEthereum /></DashboardValue>
             </DashboardRow>
             <ChartContainer>
               <PieChart width={240} height={240}>
