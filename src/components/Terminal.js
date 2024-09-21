@@ -223,7 +223,7 @@ const Terminal = () => {
   const { isConnected, signer, provider, balance: nativeBalance , roseBalance, rose, reserve0, reserve1, alpha} = useWeb3();
   const { showPopUp } = usePopUp();
 
-  const availableCommands = ['trade', 'transfer', 'balance', 'address', 'snake', 'clear', 'exit', 'sale'];
+  const availableCommands = ['launch', 'trade', 'transfer', 'balance', 'address', 'snake', 'clear', 'exit'];
 
   useEffect(() => {
     fetch(asciiArt)
@@ -389,15 +389,15 @@ const Terminal = () => {
       setShowSnakeGame(true);
       return 'Starting Snake game...';
     },
-    sale: (args) => {
+    launch: (args) => {
       if (args.length > 0) {
-        return <>sale does not take additional arguments. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
+        return <>launch does not take additional arguments. <br /> <br /> &nbsp;&nbsp;&nbsp;&nbsp;
 
-    usage: sale
+    usage: launch
         </>;
       }
       setShowSale(true);
-      return 'Opening sale interface...';
+      return 'Opening launch interface...';
     },
   };
 
