@@ -188,8 +188,10 @@ const ArrowIcon = styled.span`
 `;
 
 const DashboardContent = styled.div`
-  display: ${props => props.isVisible ? 'block' : 'none'};
-  animation: ${fadeIn} 0.3s ease-out;
+  max-height: ${props => props.isVisible ? '1000px' : '0'};
+  opacity: ${props => props.isVisible ? '1' : '0'};
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
 `;
 
 const Dashboard = styled.div`
@@ -206,6 +208,10 @@ const DashboardRow = styled.div`
   margin-bottom: 5px;
   font-size: 14px;
   color: #00ff00;
+  opacity: ${props => props.isVisible ? 1 : 0};
+  transform: translateY(${props => props.isVisible ? 0 : '10px'});
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  transition-delay: ${props => props.delay}s;
 `;
 
 const DashboardLabel = styled.span`
@@ -253,26 +259,30 @@ const ChartContainer = styled.div`
   display: flex;
   justify-content: center;
   margin-top: 15px;
+  transform: scale(${props => props.isVisible ? '1' : '0.8'});
+  opacity: ${props => props.isVisible ? '1' : '0'};
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+  transition-delay: 0.2s;
 `;
 
 const CustomTooltip = styled.div`
   background-color: rgba(0, 0, 0, 0.8);
-  border: 1px solid #00ff00;
+  border: 1px solid rgba(0, 255, 0, 0.3);
   padding: 10px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
 `;
 
 const TooltipLabel = styled.p`
-  color: #00ff00;
-  font-size: 14px;
+  color: rgba(0, 255, 0, 0.8);
+  font-size: 12px;
   margin: 0;
-  text-shadow: 0 0 5px #00ff00;
 `;
 
 const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
   const [amount, setAmount] = useState('');
   const [isDashboardVisible, setIsDashboardVisible] = useState(false);
+  const [isContentVisible, setIsContentVisible] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [totalRaised, setTotalRaised] = useState('0');
   const [expectedMarketCap, setExpectedMarketCap] = useState('0');
@@ -314,7 +324,18 @@ const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
     { name: 'Treasury', value: 5 },
   ];
 
-  const COLORS = ['#00ff00', '#00ccff', '#ff00ff'];
+  const COLORS = ['rgba(0, 255, 0, 0.4)', 'rgba(0, 204, 255, 0.4)', 'rgba(255, 0, 255, 0.4)'];
+  const HOVER_COLORS = ['rgba(0, 255, 0, 0.8)', 'rgba(0, 204, 255, 0.8)', 'rgba(255, 0, 255, 0.8)'];
+
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  const onPieEnter = (_, index) => {
+    setActiveIndex(index);
+  };
+
+  const onPieLeave = () => {
+    setActiveIndex(null);
+  };
 
   const handleAmountChange = (e) => {
     const newAmount = e.target.value.slice(0, 8);
@@ -405,6 +426,12 @@ const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
 
   const toggleDashboardVisibility = () => {
     setIsDashboardVisible(!isDashboardVisible);
+    if (!isDashboardVisible) {
+      // Set a small delay before showing content to allow for the expand animation
+      setTimeout(() => setIsContentVisible(true), 50);
+    } else {
+      setIsContentVisible(false);
+    }
   };
 
   return (
@@ -435,7 +462,7 @@ const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
         </DashboardTitle>
         <DashboardContent isVisible={isDashboardVisible}>
           <Dashboard>
-            <DashboardRow>
+            <DashboardRow isVisible={isContentVisible} delay={0.1}>
               <DashboardLabel>Type:</DashboardLabel>
               <DashboardValue>
                 Fair Launch
@@ -453,43 +480,45 @@ const Sale = ({ onClose, animateLogo, setAsyncOutput }) => {
                 </HelpTooltip>
               </DashboardValue>
             </DashboardRow>
-            <DashboardRow>
+            <DashboardRow isVisible={isContentVisible} delay={0.2}>
               <DashboardLabel>Soft Cap:</DashboardLabel>
               <DashboardValue>{softCap}<FaEthereum /></DashboardValue>
             </DashboardRow>
-            <DashboardRow>
+            <DashboardRow isVisible={isContentVisible} delay={0.3}>
               <DashboardLabel>Hard Cap:</DashboardLabel>
               <DashboardValue>{hardCap}<FaEthereum /></DashboardValue>
             </DashboardRow>
-            <DashboardRow>
+            <DashboardRow isVisible={isContentVisible} delay={0.4}>
               <DashboardLabel>Amount Raised:</DashboardLabel>
               <DashboardValue>{totalRaised}<FaEthereum /></DashboardValue>
             </DashboardRow>
-            <DashboardRow>
+            <DashboardRow isVisible={isContentVisible} delay={0.5}>
               <DashboardLabel>Implied Market Cap:</DashboardLabel>
               <DashboardValue>{expectedMarketCap}<FaEthereum /></DashboardValue>
             </DashboardRow>
-            <ChartContainer>
+            <ChartContainer isVisible={isContentVisible}>
               <PieChart width={240} height={240}>
                 <Pie
                   data={data}
                   cx={120}
-                  cy={120}
+                  cy={110}
                   innerRadius={75}
-                  outerRadius={110}
-                  paddingAngle={3}
+                  outerRadius={105}
+                  paddingAngle={4}
                   dataKey="value"
                   strokeWidth={0}
-                  cornerRadius={6}
+                  cornerRadius={8}
+                  onMouseEnter={onPieEnter}
+                  onMouseLeave={onPieLeave}
                 >
                   {data.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
-                      fill={COLORS[index % COLORS.length]}
-                      stroke="rgba(0, 0, 0, 0.3)"
+                      fill={index === activeIndex ? HOVER_COLORS[index % HOVER_COLORS.length] : COLORS[index % COLORS.length]}
+                      stroke="rgba(0, 0, 0, 0.2)"
                       strokeWidth={1}
                       style={{
-                        filter: `drop-shadow(0 0 3px ${COLORS[index % COLORS.length]})`
+                        filter: `drop-shadow(0 0 ${index === activeIndex ? '4px' : '2px'} ${COLORS[index % COLORS.length]})`
                       }}
                     />
                   ))}
