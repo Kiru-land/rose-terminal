@@ -340,7 +340,7 @@ const Terminal = () => {
       if (roseBalance) {
         const numericRoseBalance = parseFloat(roseBalance);
         const numericEthBalance = parseFloat(nativeBalance);
-        return <>Current ETH balance: {numericEthBalance.toFixed(6)} <br /> <br /> Current ROSE balance: {numericRoseBalance.toFixed(6)}🌹</>;
+        return <>Current ETH balance: {numericEthBalance.toFixed(6)} <br />Current ROSE balance: {numericRoseBalance.toFixed(6)}🌹</>;
       }
       return 'No wallet connected.';
     },
