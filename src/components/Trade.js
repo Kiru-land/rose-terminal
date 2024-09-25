@@ -276,6 +276,10 @@ const Trade = ({ onClose, animateLogo, setAsyncOutput }) => {
         quoteAmount = await roseContract.quoteWithdraw(amountInWei);
       }
 
+      if (quoteAmount === 0) {
+        return "loading quote...";
+      }
+
       return ethers.formatEther(quoteAmount);
     } catch (error) {
       console.error('Error getting quote:', error);
