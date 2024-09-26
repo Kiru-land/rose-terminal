@@ -8,10 +8,10 @@ export default async function handler(req, res) {
     const provider = new ethers.providers.JsonRpcProvider(process.env.ETH_RPC_URL);
 
     // Contract address
-    const contractAddress = '0xYourContractAddress';
+    const contractAddress = '0xdB02B6a7cfe9d4DE7D2dC585EFc27a24b6345aD1';
 
     // ERC20 token address
-    const erc20TokenAddress = '0xYourERC20TokenAddress';
+    const erc20TokenAddress = '0xdB02B6a7cfe9d4DE7D2dC585EFc27a24b6345aD1';
 
     // ERC20 ABI (minimal)
     const erc20Abi = [
@@ -41,10 +41,13 @@ export default async function handler(req, res) {
         // const ethPriceData = await ethPriceResponse.json();
         // const ethPrice = ethPriceData.price;
 
-        // Store the value in Vercel KV database
-        await kv.set('balanceRatio', result);
+        // Generate a timestamp as the key
+        const timestamp = Date.now().toString(); // Convert to string for the KV key
 
-        res.status(200).json({ success: true, result });
+        // Store the timestamp as key and price as value in Vercel KV database
+        await kv.set(timestamp, result);
+
+        res.status(200).json({ success: true, timestamp, result });
     } catch (error) {
         console.error('Error in getContractBalances:', error);
         res.status(500).json({ success: false, error: error.message });
