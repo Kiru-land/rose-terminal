@@ -1,0 +1,8 @@
+{
+    "kv": [
+      {
+        "binding": "kv",
+        "id": "your-kv-id" // Replace with your actual KV namespace ID
+      }
+    ]
+  }
