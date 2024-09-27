@@ -49,15 +49,6 @@ const CloseButton = styled.div`
   }
 `;
 
-const ChartTitle = styled.button`
-  font-family: 'Fira Code', monospace;
-  color: #00FF00;
-  font-size: 18px;
-  background: none;
-  border: none;
-  cursor: pointer;
-`;
-
 const ControlsContainer = styled.div`
   display: flex;
   align-items: center;
@@ -189,7 +180,7 @@ const ChartModal = ({ onClose }) => {
       window.removeEventListener('resize', handleResize);
       chart.remove();
     };
-  }, []);
+  }, [timeframe]);
 
   // Update candlestick data when timeframe changes
   useEffect(() => {
@@ -234,7 +225,7 @@ const ChartModal = ({ onClose }) => {
       candlestickSeries.setData(candlestickData);
       setCandlestickSeriesRef(candlestickSeries);
     }
-  }, [chartType, isLoading, candlestickData]);
+  }, [chartType, isLoading, candlestickData, candlestickSeriesRef, lineData, lineSeriesRef]);
 
   const convertToCandlestickData = (data, timeframe) => {
     // Aggregate lineData into candlestick data based on timeframe
