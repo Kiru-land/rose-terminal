@@ -4,12 +4,13 @@ import styled from 'styled-components';
 import { createChart, CrosshairMode } from 'lightweight-charts';
 
 const ModalOverlay = styled.div`
+  /* Adjusted styles to match app's background */
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5); /* Adjust if needed to match app's style */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -17,7 +18,8 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContent = styled.div`
-  background-color: #222;
+  /* Adjusted styles to match app's background */
+  background-color: #222; /* Replace with your app's background color */
   padding: 20px;
   border-radius: 4px;
   width: 90%;
@@ -55,6 +57,20 @@ const SwitchButton = styled.button`
   }
 `;
 
+const Select = styled.select`
+  padding: 6px 12px;
+  margin-right: 10px;
+  background-color: #555; /* Adjust to match app's style */
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    background-color: #777;
+  }
+`;
+
 const ChartModal = ({ onClose }) => {
   const chartContainerRef = useRef();
   const chartRef = useRef();
@@ -64,6 +80,20 @@ const ChartModal = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [lineData, setLineData] = useState([]);
   const [candlestickData, setCandlestickData] = useState([]);
+  const [timeframe, setTimeframe] = useState('300'); // Default to 5 minutes
+
+  const timeframeOptions = [
+    { label: '3m', value: '180' },
+    { label: '5m', value: '300' },
+    { label: '15m', value: '900' },
+    { label: '30m', value: '1800' },
+    { label: '1h', value: '3600' },
+    { label: '4h', value: '14400' },
+    { label: '1D', value: '86400' },
+    { label: '3D', value: '259200' },
+    { label: '1W', value: '604800' },
+    { label: '1M', value: '2592000' },
+  ];
 
   useEffect(() => {
     // Initialize chart
@@ -71,8 +101,8 @@ const ChartModal = ({ onClose }) => {
       width: chartContainerRef.current.clientWidth,
       height: 400,
       layout: {
-        backgroundColor: '#222',
-        textColor: '#d1d4dc',
+        background: { type: 'solid', color: 'black' },
+        textColor: 'white', // This will change the text color to white for better visibility
       },
       grid: {
         vertLines: {
@@ -114,8 +144,8 @@ const ChartModal = ({ onClose }) => {
         lineData.sort((a, b) => a.time - b.time);
         setLineData(lineData);
 
-        // Convert to candlestick data
-        const candlestickData = convertToCandlestickData(lineData);
+        // Generate candlestick data based on initial timeframe
+        const candlestickData = convertToCandlestickData(lineData, timeframe);
         setCandlestickData(candlestickData);
 
         setIsLoading(false);
@@ -128,6 +158,14 @@ const ChartModal = ({ onClose }) => {
       chart.remove();
     };
   }, []);
+
+  // Update candlestick data when timeframe changes
+  useEffect(() => {
+    if (lineData.length > 0) {
+      const newCandlestickData = convertToCandlestickData(lineData, timeframe);
+      setCandlestickData(newCandlestickData);
+    }
+  }, [timeframe, lineData]);
 
   // Effect to update chart when chartType or data changes
   useEffect(() => {
@@ -147,33 +185,34 @@ const ChartModal = ({ onClose }) => {
 
     if (chartType === 'line') {
       const lineSeries = chart.addLineSeries({
-        color: 'rgba(38,198,218, 1)',
+        color: '#00FF00', // Updated color
         lineWidth: 2,
       });
       lineSeries.setData(lineData);
       setLineSeriesRef(lineSeries);
     } else if (chartType === 'candlestick') {
       const candlestickSeries = chart.addCandlestickSeries({
-        upColor: '#0f0',
-        downColor: '#f00',
-        borderUpColor: '#0f0',
-        borderDownColor: '#f00',
-        wickUpColor: '#0f0',
-        wickDownColor: '#f00',
+        upColor: '#00FF00', // Up candle color
+        downColor: '#009900', // Down candle color
+        borderUpColor: '#00FF00',
+        borderDownColor: '#009900',
+        wickUpColor: '#00FF00',
+        wickDownColor: '#009900',
       });
       candlestickSeries.setData(candlestickData);
       setCandlestickSeriesRef(candlestickSeries);
     }
-  }, [chartType, isLoading]);
+  }, [chartType, isLoading, candlestickData]);
 
-  const convertToCandlestickData = (lineData) => {
-    // Aggregate lineData into candlestick data
-    // For simplicity, group data into 5-minute intervals
-    const interval = 300; // 5 minutes in seconds
+  const convertToCandlestickData = (data, timeframe) => {
+    // Aggregate lineData into candlestick data based on timeframe
+    // timeframe is in seconds
+    const interval = parseInt(timeframe); // Ensure it's a number
+
     const candlestickData = [];
     let currentCandle = null;
 
-    lineData.forEach(dataPoint => {
+    data.forEach(dataPoint => {
       const time = Math.floor(dataPoint.time / interval) * interval;
       if (!currentCandle || currentCandle.time !== time) {
         if (currentCandle) {
@@ -200,13 +239,22 @@ const ChartModal = ({ onClose }) => {
     return candlestickData;
   };
 
+  const handleTimeframeChange = (event) => {
+    setTimeframe(event.target.value);
+  };
+
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={e => e.stopPropagation()}>
         <CloseButton onClick={onClose}>Close</CloseButton>
-        <div style={{ display: 'flex', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', marginBottom: '10px', alignItems: 'center' }}>
           <SwitchButton onClick={() => setChartType('line')}>Line Chart</SwitchButton>
           <SwitchButton onClick={() => setChartType('candlestick')}>Candlestick Chart</SwitchButton>
+          <Select value={timeframe} onChange={handleTimeframeChange}>
+            {timeframeOptions.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </Select>
         </div>
         <ChartContainer ref={chartContainerRef} />
       </ModalContent>
