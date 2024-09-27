@@ -270,7 +270,6 @@ const ChartModal = ({ onClose }) => {
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={e => e.stopPropagation()}>
         <CloseButton onClick={onClose}>Close</CloseButton>
-        <ChartTitle>Chart ROSE/USD</ChartTitle>
         <ControlsContainer>
           <ControlIcon onClick={() => setChartType('line')}>
             <LineChartIcon />
