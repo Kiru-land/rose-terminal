@@ -71,10 +71,8 @@ const ChartModal = ({ onClose }) => {
       },
     });
 
-    const lineSeries = chart.addAreaSeries({
-      topColor: 'rgba(38,198,218, 0.56)',
-      bottomColor: 'rgba(38,198,218, 0.04)',
-      lineColor: 'rgba(38,198,218, 1)',
+    const lineSeries = chart.addLineSeries({
+      color: 'rgba(38,198,218, 1)',
       lineWidth: 2,
     });
 
@@ -84,14 +82,17 @@ const ChartModal = ({ onClose }) => {
     };
     window.addEventListener('resize', handleResize);
 
-    // Fetch price data for Rose/USD
-    fetch('https://api.coingecko.com/api/v3/coins/rose/market_chart?vs_currency=usd&days=30&interval=daily')
+    // Fetch price data from your API
+    fetch('https://rose-price.vercel.app/api/readPrice')
       .then(response => response.json())
       .then(data => {
-        const formattedData = data.prices.map(item => ({
-          time: item[0] / 1000, // Convert to seconds
-          value: item[1],
+        const rawData = data.data;
+        const formattedData = Object.keys(rawData).map(timestamp => ({
+          time: Number(timestamp) / 1000, // Convert milliseconds to seconds
+          value: rawData[timestamp],
         }));
+        // Sort data by time in ascending order
+        formattedData.sort((a, b) => a.time - b.time);
         lineSeries.setData(formattedData);
       })
       .catch(err => console.error('Error fetching data', err));
