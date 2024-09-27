@@ -205,7 +205,9 @@ const RoseUsdButton = styled.span`
   color: #00FF00;
   cursor: pointer;
   font-size: 14px;
-  margin-top: 10px;
+  position: absolute;
+  bottom: 40px; // Adjust this value to position it above the alpha reference
+  left: 20px;
   text-decoration: underline;
 `;
 
@@ -626,6 +628,7 @@ const Terminal = () => {
           <TabCompletion options={availableCommands} inputText={input} onSelect={handleTabCompletion} />
         )}
       </TerminalContent>
+      <RoseUsdButton onClick={handleOpenChartModal}>ROSE/USD</RoseUsdButton>
       <BottomBar />
       {showTrade && (
         <Trade 
@@ -649,9 +652,6 @@ const Terminal = () => {
         />
       )}
       {showSnakeGame && <SnakeGame onClose={() => setShowSnakeGame(false)} />}
-      <div style={{ textAlign: 'center', marginTop: '20px' }}>
-        <RoseUsdButton onClick={handleOpenChartModal}>ROSE/USD</RoseUsdButton>
-      </div>
       {isChartModalOpen && <ChartModal onClose={handleCloseChartModal} />}
     </TerminalContainer>
   );
