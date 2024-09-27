@@ -5,8 +5,8 @@ import { useWeb3 } from '../contexts/Web3Context';
 import Prompt from './Prompt';
 import TabCompletion from './TabCompletion';
 import BottomBar from './BottomBar';
+import ChartModal from './ChartModal';
 import asciiArt from '../assets/ascii-art.txt';
-import Chart from './Chart';
 import { FaCircleInfo, FaEthereum, FaGithub } from 'react-icons/fa6';
 import Intro from './Intro';
 import SnakeGame from './SnakeGame';
@@ -200,6 +200,15 @@ const GitHubLink = styled.a`
   }
 `;
 
+const RoseUsdButton = styled.span`
+  font-family: 'Fira Code', monospace;
+  color: #00FF00;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+  text-decoration: underline;
+`;
+
 const Terminal = () => {
   const [input, setInput] = useState('');
   const [history, setHistory] = useState([]);
@@ -207,11 +216,11 @@ const Terminal = () => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [showTabCompletion, setShowTabCompletion] = useState(false);
   const [showTabHint, setShowTabHint] = useState(true);
-  const [chartData, setChartData] = useState([1, 0.8, 1.5, 1.9, 1.8, 2.5, 1.1, 1.5, 1.7, 2.2, 3.3, 3.5, 4.5, 4.8, 4.2, 5.3, 4.1, 4.7, 5.8, 6.3, 6.1, 4.2, 5.1, 6.1, 6.7, 7.8, 8.7, 10, 20, 15, 25, 30, 22, 18, 32, 45, 41, 50, 56, 62, 48, 45, 51, 43, 41, 38, 50, 48,47, 53, 56, 57, 75, 86, 95, 70, 56, 76]);
   const [asyncOutput, setAsyncOutput] = useState(null);
   const [asciiLogo, setAsciiLogo] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
+  const [isChartModalOpen, setIsChartModalOpen] = useState(false);
   const [showSnakeGame, setShowSnakeGame] = useState(false);
   const [showTrade, setShowTrade] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
@@ -538,6 +547,14 @@ const Terminal = () => {
     }
   };
 
+  const handleOpenChartModal = () => {
+    setIsChartModalOpen(true);
+  };
+
+  const handleCloseChartModal = () => {
+    setIsChartModalOpen(false);
+  };
+
   return (
     <TerminalContainer onClick={handleContainerClick}>
       <GitHubLink 
@@ -609,7 +626,6 @@ const Terminal = () => {
           <TabCompletion options={availableCommands} inputText={input} onSelect={handleTabCompletion} />
         )}
       </TerminalContent>
-      <Chart data={chartData} />
       <BottomBar />
       {showTrade && (
         <Trade 
@@ -633,6 +649,10 @@ const Terminal = () => {
         />
       )}
       {showSnakeGame && <SnakeGame onClose={() => setShowSnakeGame(false)} />}
+      <div style={{ textAlign: 'center', marginTop: '20px' }}>
+        <RoseUsdButton onClick={handleOpenChartModal}>ROSE/USD</RoseUsdButton>
+      </div>
+      {isChartModalOpen && <ChartModal onClose={handleCloseChartModal} />}
     </TerminalContainer>
   );
 };
