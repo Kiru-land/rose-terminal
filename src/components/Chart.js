@@ -99,7 +99,7 @@ const Chart = () => {
             <ChartContainer>
                 {chartString}
             </ChartContainer>
-            <SeeChartButton onClick={handleOpenModal}>See Chart</SeeChartButton>
+            <SeeChartButton onClick={handleOpenModal}>Chart ROSE/USD</SeeChartButton>
             {isModalOpen && <ChartModal onClose={handleCloseModal} />}
         </div>
     );
