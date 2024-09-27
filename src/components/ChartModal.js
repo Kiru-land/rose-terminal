@@ -2,6 +2,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { createChart, CrosshairMode } from 'lightweight-charts';
+// Import icons (you need to have these icons in your assets)
+import { ReactComponent as LineChartIcon } from '../assets/line-chart-icon.svg';
+import { ReactComponent as CandlestickIcon } from '../assets/candlestick-icon.svg';
 
 const ModalOverlay = styled.div`
   /* Adjusted styles to match app's background */
@@ -43,31 +46,51 @@ const CloseButton = styled.button`
   right: 10px;
 `;
 
-const SwitchButton = styled.button`
-  padding: 6px 12px;
-  margin-right: 10px;
-  background-color: #555;
-  color: #fff;
+const ChartTitle = styled.button`
+  font-family: 'Fira Code', monospace;
+  color: #00FF00;
+  font-size: 18px;
+  background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+`;
+
+const ControlsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+`;
+
+const ControlIcon = styled.div`
+  cursor: pointer;
+  margin-right: 15px;
+
+  svg {
+    fill: #00FF00;
+    width: 24px;
+    height: 24px;
+  }
 
   &:hover {
-    background-color: #777;
+    opacity: 0.8;
   }
 `;
 
 const Select = styled.select`
-  padding: 6px 12px;
-  margin-right: 10px;
-  background-color: #555; /* Adjust to match app's style */
-  color: #fff;
+  font-family: 'Fira Code', monospace;
+  background: none;
+  color: #00FF00;
   border: none;
   cursor: pointer;
   font-size: 14px;
 
-  &:hover {
-    background-color: #777;
+  option {
+    background-color: #222;
+    color: #fff;
+  }
+
+  &:focus {
+    outline: none;
   }
 `;
 
@@ -247,15 +270,20 @@ const ChartModal = ({ onClose }) => {
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={e => e.stopPropagation()}>
         <CloseButton onClick={onClose}>Close</CloseButton>
-        <div style={{ display: 'flex', marginBottom: '10px', alignItems: 'center' }}>
-          <SwitchButton onClick={() => setChartType('line')}>Line Chart</SwitchButton>
-          <SwitchButton onClick={() => setChartType('candlestick')}>Candlestick Chart</SwitchButton>
+        <ChartTitle>Chart ROSE/USD</ChartTitle>
+        <ControlsContainer>
+          <ControlIcon onClick={() => setChartType('line')}>
+            <LineChartIcon />
+          </ControlIcon>
+          <ControlIcon onClick={() => setChartType('candlestick')}>
+            <CandlestickIcon />
+          </ControlIcon>
           <Select value={timeframe} onChange={handleTimeframeChange}>
             {timeframeOptions.map(option => (
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
           </Select>
-        </div>
+        </ControlsContainer>
         <ChartContainer ref={chartContainerRef} />
       </ModalContent>
     </ModalOverlay>
