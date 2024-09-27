@@ -86,6 +86,12 @@ const Select = styled.select`
   border: none;
   cursor: pointer;
   font-size: 14px;
+  appearance: none; // This removes the default styling
+  padding-right: 20px; // Add some padding to the right for the custom arrow
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%2300FF00' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0px top 50%;
+  background-size: 20px;
 
   option {
     background-color: #222;
