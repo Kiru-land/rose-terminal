@@ -34,16 +34,19 @@ const ChartContainer = styled.div`
   height: 400px;
 `;
 
-const CloseButton = styled.button`
-  padding: 6px 10px;
-  background-color: #ff4444;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
+const CloseButton = styled.div`
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 20px; // Lowered from 15px to 20px
+  right: 20px; // Adjusted right position for consistency
+  width: 20px;
+  height: 3px;
+  background-color: #00FF00; // The green color used in your app
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const ChartTitle = styled.button`
@@ -269,7 +272,7 @@ const ChartModal = ({ onClose }) => {
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={e => e.stopPropagation()}>
-        <CloseButton onClick={onClose}>Close</CloseButton>
+        <CloseButton onClick={onClose} />
         <ControlsContainer>
           <ControlIcon onClick={() => setChartType('line')}>
             <LineChartIcon />
